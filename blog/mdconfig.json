@@ -28,14 +28,17 @@
       "submenu": [
         {
           "title": "bus",
+          "icon": "el-icon-document",
           "path": "/marvel/bus"
         },
         {
           "title": "card1",
+          "icon": "el-icon-document",
           "path": "/marvel/card1"
         },
         {
           "title": "file",
+          "icon": "el-icon-document",
           "path": "/marvel/file"
         }
       ]
@@ -45,14 +48,17 @@
       "submenu": [
         {
           "title": "img",
+          "icon": "el-icon-document",
           "path": "/test/img"
         },
         {
           "title": "image",
+          "icon": "el-icon-document",
           "path": "/test/image"
         },
         {
           "title": "pswp",
+          "icon": "el-icon-document",
           "path": "/test/pswp"
         }
       ]
