@@ -27,19 +27,48 @@
       "card_type": "leftmenu",
       "submenu": [
         {
-          "title": "bus",
+          "title": "基础组件",
+          "name": "基础组件",
           "icon": "el-icon-document",
-          "path": "/marvel/bus"
+          "submenu": [
+            {
+              "title": "card11",
+              "path": "/marvel/card11"
+            }
+          ]
         },
         {
-          "title": "card1",
+          "title": "基础知识",
+          "name": "基础知识",
           "icon": "el-icon-document",
-          "path": "/marvel/card1"
+          "submenu": [
+            {
+              "title": "card11",
+              "path": "/marvel/card11"
+            }
+          ]
         },
         {
-          "title": "file",
+          "title": "ui服务",
+          "name": "ui服务",
           "icon": "el-icon-document",
-          "path": "/marvel/file"
+          "submenu": [
+            {
+              "title": "card11",
+              "path": "/marvel/card11"
+            }
+          ]
+        },
+        {
+          "title": "第三方服务",
+          "name": "第三方服务",
+          "icon": "el-icon-document",
+          "submenu": [
+            {
+              "title": "card11",
+              "path": "/marvel/card11"
+            }
+          ]
         }
       ]
     },
@@ -49,7 +78,13 @@
         {
           "title": "img",
           "icon": "el-icon-document",
-          "path": "/test/img"
+          "path": "/test/img",
+          "submenu": [
+            {
+              "title": "img",
+              "icon": "el-icon-document",
+              "path": "/test/img"
+            }]
         },
         {
           "title": "image",
