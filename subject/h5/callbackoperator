@@ -1,0 +1,25 @@
+{
+    "status":0,
+    "message":"ok",
+    "data":{
+        "items":[
+            {
+                "pic":"https://ww4.sinaimg.cn/thumb300/662eec4egw1fbeon5m1mvj20dt0kfwh1.jpg",
+                "scheme":"",
+                "title":"锐意进取",
+                "option_id":"123",
+                "vote_num":"11",
+                "is_vote":1,
+                "vote_num_rate":"1.1%"
+            },
+            {
+                "pic":"https://ww1.sinaimg.cn/thumb300/662eec4egw1fbeoni7955j20dj0l4tb3.jpg",
+                "scheme":"",
+                "title":"时代之感",
+                "option_id":"124",
+                "vote_num":"21",
+                "vote_num_rate":"2%"
+            }
+        ]
+    }
+}
