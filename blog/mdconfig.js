@@ -1,4 +1,4 @@
-{
+bconfig={
   "mheader": [
     {
       "card_type": "mheader",
@@ -13,7 +13,11 @@
         },
         {
           "title": "17作业题库样式",
-          "name": "17zuoyecss"
+          "name": "17zuoyecss",
+          "submenu": [{
+            "title": "中学英语",
+            "name": "zy",
+          }]
         },
         {
           "title": "源码下载",
@@ -47,26 +51,50 @@
       "card_type": "leftmenu",
       "submenu": [
         {
-          "title": "选择题",
+          "title": "新二级题型列表",
           "icon": "el-icon-document",
-          "path": "/test/img",
+          "name": "zy"
+        }, {
+          "title": "所有新二级题型",
+          "icon": "el-icon-document",
+          "name": "zyall"
+        },
+        {
+          "title": "作业题型",
+          "icon": "el-icon-document",
+          "name": "zy",
           "submenu": [
             {
-              "title": "2070321",
+              "title": "单词跟读",
               "icon": "el-icon-location",
-              "path": "/test/img"
+              "name": "203017003"
+            },
+            {
+              "title": "中译英",
+              "icon": "el-icon-location",
+              "name": "203017001"
+            },
+            {
+              "title": "英译中",
+              "icon": "el-icon-location",
+              "name": "203017002"
             }
           ]
         },
         {
-          "title": "填空题",
+          "title": "听力题型",
           "icon": "el-icon-document",
-          "path": "/test/image"
+          "name": "听力题型"
         },
         {
-          "title": "听力",
+          "title": "考试口语题型",
           "icon": "el-icon-document",
-          "path": "/test/pswp"
+          "name": "考试口语题型"
+        },
+        {
+          "title": "笔试题型",
+          "icon": "el-icon-document",
+          "name": "笔试题型"
         }
       ]
     }
@@ -104,6 +132,75 @@
         {
           "card_type": "md",
           "md_type": "test"
+        }
+      ]
+    },
+
+    {
+      "path": "/zy",
+      "name": "zy",
+      "mheader": true,
+      "leftmenu": 1,
+      "card_group": [
+        {
+          "card_type": "md",
+          "md_type": "zy"
+        }
+      ]
+    },
+    {
+      "path": "/zy/all",
+      "name": "zyall",
+      "mheader": true,
+      "leftmenu": 1,
+      "card_group": [
+        {
+          "card_type": "md",
+          "md_type": "zy/base"
+        },
+        {
+          "card_type": "md",
+          "md_type": "zy/all"
+        }
+      ]
+    },
+    {
+      "path": "/zy/203017003",
+      "name": "203017003",
+      "mheader": true,
+      "leftmenu": 1,
+      "card_group": [
+        {
+          "card_type": "md",
+          "md_type": "zy/base"
+        },
+        {
+          "card_type": "md",
+          "md_type": "zy/203017003"
+        }
+      ]
+    },
+    {
+      "path": "/zy/203017001",
+      "name": "203017001",
+      "mheader": true,
+      "leftmenu": 1,
+      "card_group": [
+        {
+          "card_type": "md",
+          "md_type": "zy/203017001"
+        }
+      ]
+    },
+    {
+      "path": "/zy/203017002",
+      "name": "203017002",
+      "mheader": true,
+      "leftmenu": 1,
+      "card_group": [
+        {
+          "card_type": "md",
+          "md_type": "zy/203017002"
         }
       ]
     },
