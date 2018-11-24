@@ -15,7 +15,7 @@ bconfig={
           "title": "17作业题库样式",
           "name": "17zuoyecss",
           "submenu": [{
-            "title": "中学英语",
+            "title": "中英新题型",
             "name": "zy",
           }]
         },
@@ -51,11 +51,12 @@ bconfig={
       "card_type": "leftmenu",
       "submenu": [
         {
-          "title": "新二级题型列表",
+          "title": "中英新题型id",
           "icon": "el-icon-document",
           "name": "zy"
-        }, {
-          "title": "所有新二级题型",
+        },
+        {
+          "title": "中英新题型ui",
           "icon": "el-icon-document",
           "name": "zyall"
         },
@@ -145,6 +146,18 @@ bconfig={
         {
           "card_type": "md",
           "md_type": "zy"
+        }
+      ]
+    },
+    {
+      "path": "/zyold",
+      "name": "zyold",
+      "mheader": true,
+      "leftmenu": 1,
+      "card_group": [
+        {
+          "card_type": "md",
+          "md_type": "zyold"
         }
       ]
     },
