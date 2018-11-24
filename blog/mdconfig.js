@@ -79,13 +79,125 @@ bconfig={
               "title": "英译中",
               "icon": "el-icon-location",
               "name": "203017002"
+            },
+            {
+              "title": "单词拼写",
+              "icon": "el-icon-location",
+              "name": "203017000"
+            },
+            {
+              "title": "例句跟读",
+              "icon": "el-icon-location",
+              "name": "203017005"
+            },
+            {
+              "title": "句子跟读",
+              "icon": "el-icon-location",
+              "name": "203017006"
+            },
+            {
+              "title": "句子拼写",
+              "icon": "el-icon-location",
+              "name": "203017004"
+            },
+            {
+              "title": "词汇造句",
+              "icon": "el-icon-location",
+              "name": "203017009"
             }
           ]
         },
         {
           "title": "听力题型",
           "icon": "el-icon-document",
-          "name": "听力题型"
+          "name": "听力题型",
+          "submenu": [
+            {
+              "title": "听字母选答案",
+              "icon": "el-icon-location",
+              "name": "203000018"
+            },
+            {
+              "title": "听单词选答案",
+              "icon": "el-icon-location",
+              "name": "203000015"
+            },
+            {
+              "title": "听短语选答案",
+              "icon": "el-icon-location",
+              "name": "203000016"
+            },
+            {
+              "title": "听单词选音标",
+              "icon": "el-icon-location",
+              "name": "203000017"
+            },
+            {
+              "title": "听单词选音标",
+              "icon": "el-icon-location",
+              "name": "203000001"
+            },
+            {
+              "title": "听句子选信息",
+              "icon": "el-icon-location",
+              "name": "203000001"
+            },
+            {
+              "title": "听句子选句子",
+              "icon": "el-icon-location",
+              "name": "203000002"
+            },
+            {
+              "title": "听句子选同意句",
+              "icon": "el-icon-location",
+              "name": "203000003"
+            },
+            {
+              "title": "听句子选答语",
+              "icon": "el-icon-location",
+              "name": "203000000"
+            },
+            {
+              "title": "听句子选图片(选择)",
+              "icon": "el-icon-location",
+              "name": "203000004"
+            },
+            {
+              "title": "看图片选句子",
+              "icon": "el-icon-location",
+              "name": "203000005"
+            },
+            {
+              "title": "听对话选图片(选择)",
+              "icon": "el-icon-location",
+              "name": "203000006"
+            },
+            {
+              "title": "听句子选图片(填空)",
+              "icon": "el-icon-location",
+              "name": "203001000"
+            },
+            {
+              "title": "听对话选图片(填空)",
+              "icon": "el-icon-location",
+              "name": "203000001"
+            },
+            {
+              "title": "听对话及问题选图片",
+              "icon": "el-icon-location",
+              "name": "203000007"
+            },
+            {
+              "title": "听短对话选答案",
+              "icon": "el-icon-location",
+              "name": "203000008"
+            },
+            {
+              "title": "听长对话选答案",
+              "icon": "el-icon-location",
+              "name": "203000009"
+            }
+          ]
         },
         {
           "title": "考试口语题型",
