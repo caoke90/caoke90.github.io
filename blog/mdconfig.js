@@ -219,19 +219,36 @@ bconfig={
       "card_type": "leftmenu",
       "submenu": [
         {
-          "title": "前端工程化",
+          "title": "项目重构解决方案",
           "icon": "el-icon-document",
-          "name": "fework"
-        },
-        {
-          "title": "第三方组件",
-          "icon": "el-icon-document",
-          "path": "/fe/bus"
-        },
-        {
-          "title": "公共组件",
-          "icon": "el-icon-document",
-          "path": "/marvel/card1"
+          "name": "fework",
+          "submenu": [
+            {
+              "title": "前端项目设计简介",
+              "icon": "el-icon-location",
+              "path": "/fe/updatemd5"
+            },
+            {
+              "title": "项目工程化方案",
+              "icon": "el-icon-location",
+              "path": "/fe/updatemd5"
+            },
+            {
+              "title": "组件化开发题库方案",
+              "icon": "el-icon-location",
+              "path": "/fe/updatemd5"
+            },
+            {
+              "title": "第三方组件（题库）和外部通信问题",
+              "icon": "el-icon-location",
+              "path": "/fe/updatemd5"
+            },
+            {
+              "title": "解决版本更新问题的4种方法（引入第三方组件）",
+              "icon": "el-icon-location",
+              "path": "/fe/updatemd5"
+            }
+          ]
         }
       ]
     },
@@ -249,7 +266,7 @@ bconfig={
       ]
     },
     {
-      "path": "/fework",
+      "path": "/fe/fework",
       "name": "fework",
       "mheader": true,
       "leftmenu": 2,
@@ -257,6 +274,18 @@ bconfig={
         {
           "card_type": "md",
           "md_type": "fe/fework"
+        }
+      ]
+    },
+    {
+      "path": "/fe/updatemd5",
+      "name": "updatemd5",
+      "mheader": true,
+      "leftmenu": 2,
+      "card_group": [
+        {
+          "card_type": "md",
+          "md_type": "fe/updatemd5"
         }
       ]
     },
