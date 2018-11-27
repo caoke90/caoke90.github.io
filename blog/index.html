@@ -10,7 +10,10 @@
   <body>
   <script>
 
-      document.write("<s"+"cript type='text/javascript' src='mdconfig.js?"+Math.random()+"'></scr"+"ipt>");
+
+      var  js = document.createElement( " script " )
+      js.src = " mdconfig.js " + Math.random()
+      document.body.appendChild(js)
 
   </script>
   <!--<script src=mdconfig.js?61b3641bcd4047a29ac4></script>-->
