@@ -256,7 +256,7 @@ class Game extends Axeis{
 
         this.slumpObject=[]
         for(let k=0;k<100;k++){
-            const circle=new ccCircle(Point(0|Math.random()*75,0|Math.random()*133),2)
+            const circle=new ccCircle(Point(0|Math.random()*75,0|Math.random()*133),0|Math.random()*3+1)
             this.world.add(circle)
             this.slumpObject.push(circle)
         }
