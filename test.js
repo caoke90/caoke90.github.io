@@ -1,14 +1,32 @@
+const canvas=document.getElementById("myCanvas");
 
-var cc={}
-cc.canvas=document.getElementById("myCanvas")
-cc.ctx=cc.canvas.getContext("2d");
+var cc={
+    canvas:canvas,
+    ctx:canvas.getContext("2d"),
+    translate(str){
+        if(/px/.test(str)){
+            return parseInt(str)
+        }
+        if(/vh/.test(str)){
+            return parseInt(str)*window.innerHeight/100
+        }
+        if(/vw/.test(str)){
+            return parseInt(str)*window.innerWidth/100
+        }
+    }
+}
+cc.width=canvas.width=cc.translate('100vw');
+cc.height=canvas.height=cc.translate('100vh');
 
+cc.rect=canvas.getBoundingClientRect();
 
 class Node{
     constructor(){
 
         this.children=[]
         this.parent=null;
+        this.isShow=true;
+
     }
     add(node){
         if(!node.parent){
@@ -25,12 +43,58 @@ class Node{
         })
     }
     render(){
+        if(!this.isShow){return false;}
         for(let i=0;i<this.children.length;i++){
             this.children[i].render()
         }
+        return true;
     }
 }
-class ccRect extends Node{
+class Axeis extends Node{
+    constructor(){
+        super();
+        this.point=Point(0,0);
+        this.grid=1;
+        this.angle=0;
+        this.isAxeis=true;
+    }
+    show(){
+        for(let x=0;x<=75;x++){
+            const line=new ccLine(Point(x,0),Point(x,133))
+            line.strokeStyle='#f5f6f7'
+            this.add(line)
+        }
+
+        for(let y=0;y<=133;y++){
+            const line=new ccLine(Point(0,y),Point(75,y))
+            line.strokeStyle='#f5f6f7'
+            this.add(line)
+        }
+    }
+    WorldToScreenGrid(grid){
+        grid=this.grid*grid;
+        if(this.parent&&this.parent.isAxeis){
+            grid= this.parent.WorldToScreenGrid(grid)
+        }
+        return grid;
+    }
+    WorldToScreenPoint(pos){
+        pos=Point.add(Point.rotate(Point.multiply(pos,this.grid),this.angle),this.point)
+
+        if(this.parent&&this.parent.isAxeis){
+            pos= this.parent.WorldToScreenPoint(pos)
+        }
+
+        return pos;
+    }
+    ScreenToWorldPoint(pos){
+        if(this.parent&&this.parent.isAxeis){
+            pos=this.parent.ScreenToWorldPoint(pos)
+        }
+        return Point.divide(Point.rotate(Point.sub(pos,this.point),-this.angle),this.grid);
+    }
+}
+class ccRect extends Axeis{
     constructor(point,width,height){
         super()
         this.point=point;
@@ -38,13 +102,27 @@ class ccRect extends Node{
         this.height=height;
     }
     render(){
+        if(!super.render()){return;}
         const ctx=cc.ctx;
-        ctx.rect(this.point.x-this.width/2,cc.height-this.point.y-this.height/2,this.width,this.height);
+        const arr=[
+            this.WorldToScreenPoint(Point(-this.width/2,this.height/2)),
+            this.WorldToScreenPoint(Point(this.width/2,this.height/2)),
+            this.WorldToScreenPoint(Point(this.width/2,-this.height/2)),
+            this.WorldToScreenPoint(Point(-this.width/2,-this.height/2)),
+        ]
+        ctx.beginPath();
+        ctx.moveTo(arr[0].x,cc.height-arr[0].y);
+        ctx.lineTo(arr[1].x,cc.height-arr[1].y);
+        ctx.lineTo(arr[2].x,cc.height-arr[2].y);
+        ctx.lineTo(arr[3].x,cc.height-arr[3].y);
+        ctx.closePath();
+
         ctx.strokeStyle="#72dd38";
         ctx.stroke();
+
     }
 }
-class ccLine extends Node{
+class ccLine extends Axeis{
     constructor(a,b){
         super()
         this.a=a;
@@ -52,29 +130,35 @@ class ccLine extends Node{
 
     }
     render(){
+        if(!super.render()){return;}
         const ctx=cc.ctx;
+        const a=this.WorldToScreenPoint(this.a);
+        const b=this.WorldToScreenPoint(this.b);
         ctx.beginPath();
-        ctx.moveTo(this.a.x,cc.height-this.a.y);
-        ctx.lineTo(this.b.x,cc.height-this.b.y);
+        ctx.moveTo(a.x,cc.height-a.y);
+        ctx.lineTo(b.x,cc.height-b.y);
         ctx.strokeStyle=this.strokeStyle;
         ctx.stroke();
     }
 }
-class ccText extends Node{
+class ccText extends Axeis{
     constructor(text,point){
         super()
         this.text=text
-        this.point=point
+        this.point=point||Point(0,0)
     }
     render(){
+        if(!super.render()){return;}
         const ctx=cc.ctx;
         ctx.font="10px Arial";
         ctx.textAlign=this.textAlign||"center";
         ctx.textBaseline=this.textBaseline||"middle";
-        ctx.fillText(this.text,this.point.x,cc.height-this.point.y);
+        const point=this.WorldToScreenPoint(Point(0,0));
+
+        ctx.fillText(this.text,point.x,cc.height-point.y);
     }
 }
-class ccCircle extends Node{
+class ccCircle extends Axeis{
     constructor(point,radius,startingAngle,endingAngle){
         super()
         this.point=point;
@@ -84,36 +168,24 @@ class ccCircle extends Node{
 
     }
     render(){
+        if(!super.render()){return;}
         const ctx=cc.ctx;
+        const point=this.WorldToScreenPoint(Point(0,0));
         ctx.beginPath();
-        ctx.arc(this.point.x,cc.height-this.point.y,this.radius,this.startingAngle,this.endingAngle);
+        ctx.arc(point.x,cc.height-point.y,this.WorldToScreenGrid(this.radius),this.startingAngle,this.endingAngle);
+        ctx.strokeStyle=this.strokeStyle||'#dd4c3c';
         ctx.stroke();
     }
 }
-class Page extends Node{
-    translate(str){
-        if(/px/.test(str)){
-            return parseInt(str)
-        }
-        if(/vh/.test(str)){
-            return parseInt(str)*window.innerHeight/100
-        }
-        if(/vw/.test(str)){
-            return parseInt(str)*window.innerWidth/100
-        }
-    }
+
+class Game extends Axeis{
+
     constructor(){
         super()
-        cc.width=this.translate('100vw');
-        cc.height=this.translate('100vh');
 
-        cc.canvas.width=cc.width;
-        cc.canvas.height=cc.height;
-        cc.rect=cc.canvas.getBoundingClientRect();
         //交互
         const handle=(e)=> {
             let type=e.type;
-            console.log(type)
             if(type==='mousedown'){
                 type='touchstart';
             }
@@ -127,6 +199,7 @@ class Page extends Node{
                 type='touchend';
             }
             if(e.type==='mousedown'||e.type==='mousemove'||e.type==='mouseup'){
+
                 this[type]([Point(
                     e.x-cc.rect.left,
                     cc.height-(e.y-cc.rect.top)
@@ -153,119 +226,160 @@ class Page extends Node{
         document.addEventListener('touchmove',handle,false)
         document.addEventListener('touchend',handle,false)
         document.addEventListener('touchcancel',handle,false)
-    }
-    async init(){
-        const cellW=18;
-        this.cellW=cellW;
-        //行
-        const wCen=(parseInt(cc.width/cellW)>>1)*2;
-        const hCen=(parseInt(cc.height/cellW)>>1)*2;
-        const width=this.width=wCen*cellW;
-        const height=this.height=hCen*cellW;
-        console.log(wCen,hCen)
 
-        for(let i=0;i<=wCen;i++){
-            const line=new ccLine(Point(i*cellW,0),Point(i*cellW,height))
-            if(i===wCen/2){
-                line.strokeStyle='#dd4a41'
-            }else{
-                line.strokeStyle='#ddd'
-                const text=new ccText(i-wCen/2,Point(i*cellW,(hCen/2)*cellW))
-                text.strokeStyle='#dddb6f'
-                text.textBaseline='top';
-                this.add(text)
+    }
+    init(){
+        this.runArr=['initAxes','slump'];
+
+        this.world=new Axeis();
+        this.world.grid=10;
+        this.add(this.world)
+        this.progress=new Step(this.runArr,(step,time)=>{
+            this[step](step,time);
+            cc.ctx.clearRect(0,0,cc.width,cc.height);
+            this.render()
+        })
+        this.progress.run();
+
+    }
+
+    initAxes(){
+        // this.show()
+        this.world.show()
+
+        this.progress.waitSecondAndGo();
+
+        // this.rect={
+        //     top:10,left:-10,bottom:-10,right:10
+        // }
+        // this.direct='right';
+
+        this.slumpObject=[]
+        for(let k=0;k<100;k++){
+            const circle=new ccCircle(Point(0|Math.random()*75,0|Math.random()*133),2)
+            this.world.add(circle)
+            this.slumpObject.push(circle)
+        }
+        this.slumpObject=this.slumpObject.sort((a,b)=>{
+            return this._sort(a.point,b.point)
+        })
+        this.slumpObject.forEach(function (sp,i) {
+            sp.add(new ccText(sp.point.x+','+sp.point.y,Point(0,0)))
+        })
+        const rect=new ccRect(Point(2,2),2,2)
+
+        this.world.add(rect)
+
+    }
+    //按照x和y大小排序
+    _sort(a,b){
+        if(a.x== b.x&&a.y== b.y){
+            return 0
+        }
+        if(a.x== b.x){
+            return a.y> b.y?1:-1
+        }
+        return a.x> b.x?1:-1
+
+    }
+    slump(){
+        for(let i=0;i<this.slumpObject.length;i++){
+            const cur=this.slumpObject[i]
+            if(cur.point.y>10){
+                cur.point.y-=0.5
             }
-            this.add(line)
-
-
         }
-        for(let i=0;i<=hCen;i++){
-            const line=new ccLine(Point(0,i*cellW),Point(width,i*cellW))
-            if(hCen/2===i){
-                line.strokeStyle='#dd4a41'
-            }else{
-                line.strokeStyle='#ddd'
 
-                const text=new ccText(i-hCen/2,Point(width/2,(i)*cellW))
-                text.strokeStyle='#dddb6f'
-                text.textAlign="right";
-                this.add(text)
+        for(let i=0;i<this.slumpObject.length;i++){
+            const cur=this.slumpObject[i]
+            for(let k=0;k<this.slumpObject.length;k++){
+                if(i===k){
+                    continue;
+                }
+                const next=this.slumpObject[k]
+                const dist=Point.dist(cur.point,next.point)
+                const num=cur.radius+next.radius-dist
+                if(num>0){
+                    const point=Point.multiply(Point.sub(next.point,cur.point),(cur.radius+next.radius-num/2)/(dist));
+                    next.point=Point.add(cur.point,point)
+
+
+                }
             }
-            this.add(line)
         }
 
+        this.slumpObject.forEach(function (cur) {
 
+            if(cur.point.y<9){
+                cur.point.y+=0.5
+            }
+            if(cur.point.x<0){
+                cur.point.x+=0.5
+            }
+            if(cur.point.x>75){
+                cur.point.x-=0.5
+            }
+        })
+        this.progress.waitSecondAndGo(0.05,'slump')
     }
-    render(){
-        cc.ctx.clearRect(0,0,cc.width,cc.height)
-        super.render()
+    toggle(){
+        if(this.direct=='right'){
+            if(this.circle.point.x<this.rect.right){
+                this.circle.point.x+=1
+            }else{
+                this.rect.top-=1;
+                this.direct='bottom'
+            }
 
-    }
-    touchstart([position]){
+        }else if(this.direct=='bottom'){
+            if(this.circle.point.y>this.rect.bottom){
+                this.circle.point.y-=1
+            }else{
+                this.rect.right-=1
+                this.direct='left'
+            }
 
-        const relaPoint=Point(Math.round(position.x/this.cellW)*this.cellW,Math.round(position.y/this.cellW)*this.cellW)
-        if(!this.line){
-            this.line=new ccLine(relaPoint,relaPoint);
-            this.line.strokeStyle="#dd6dd0";
-            this.add(this.line)
-
-            const text=new ccText(`${(relaPoint.x-this.width/2)/this.cellW},${(relaPoint.y-this.height/2)/this.cellW}`,relaPoint)
-            this.add(text)
-            this.text2=new ccText(`${(relaPoint.x-this.width/2)/this.cellW},${(relaPoint.y-this.height/2)/this.cellW}`,relaPoint)
-            this.add(this.text2)
-
-            // const circle=new ccCircle(relaPoint,5)
-            // this.add(circle)
-            // this.circle2=new ccCircle(relaPoint,5)
-            // this.add(this.circle2)
+        }else if(this.direct=='left'){
+            if(this.circle.point.x>this.rect.left){
+                this.circle.point.x-=1
+            }else{
+                this.rect.bottom+=1
+                this.direct='top'
+            }
+        }else if(this.direct=='top'){
+            if(this.circle.point.y<this.rect.top){
+                this.circle.point.y+=1
+            }else{
+                this.rect.left+=1
+                this.direct='right'
+            }
         }
+        if(this.circle.point.x==0&&this.circle.point.y==0){
+            return;
+        }
+        console.log(this.circle.point)
+        // this.world.grid=this.world.grid+this.addNum;
+        // this.world.angle+=0.3;
+        // this.world2.angle-=0.3;
+        // if(this.world.grid>100){
+        //     this.addNum=-2;
+        // }
+        // if(this.world.grid<20){
+        //     this.addNum=2;
+        // }
+        this.progress.waitSecondAndGo(0.1,'toggle')
+    }
+    touchstart([pos]){
+        console.log(pos)
+        console.log(this.world.ScreenToWorldPoint(pos))
+        // console.log(this.world2.ScreenToWorldPoint(pos))
+    }
+    touchmove([pos]){
 
     }
-    touchmove([position]){
+    touchend([pos]){
 
-        const relaPoint=Point(Math.round(position.x/this.cellW)*this.cellW,Math.round(position.y/this.cellW)*this.cellW)
-        if(this.line){
-            this.line.b=relaPoint;
-            // this.circle2.point=relaPoint;
-
-            this.text2.text=`${(relaPoint.x-this.width/2)/this.cellW},${(relaPoint.y-this.height/2)/this.cellW}`;
-            this.text2.point=relaPoint;
-
-
-        }
-
-    }
-    touchend([position]){
-
-        if(this.line){
-            this.line=null;
-        }
     }
 }
-cc._time=0;
-cc.queue=[];
-cc.wait=function(second){
-    return new Promise((res,rej)=>{
-        cc.queue.push({callback:res,time:second+cc._time})
-    })
-}
-//page
-const page=new Page();
-page.init()
-
-function step(timestamp) {
-    cc._time+=18;
-    cc.queue=cc.queue.filter(function (item) {
-        if(cc._time>item.time){
-            item.callback()
-            return false;
-        }else {
-            return true;
-        }
-    })
-    page.render();
-    window.requestAnimationFrame(step);
-}
-window.requestAnimationFrame(step);
-
+new Game().init()
 

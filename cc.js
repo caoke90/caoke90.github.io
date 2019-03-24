@@ -384,6 +384,7 @@ Point.dist=function (a,b) {
 }
 //逆时针旋转,a为弧度
 Point.rotate=function (p,A) {
+    if(A===0){return p;}
     const tx=p.x;
     const ty=p.y;
     return Point(tx*Math.cos(A)-ty*Math.sin(A),tx*Math.sin(A)+ty*Math.cos(A))
@@ -440,4 +441,189 @@ Line.moveD=function (a,len) {
     d=Point.divide(d,d.norm());
     d=Point.rotate(d,Math.PI/2);
     return Line(Point.add(a.a,Point.multiply(d,len)),Point.add(a.b,Point.multiply(d,len)))
+}
+/*
+* 流程控制器
+* 作者：caoke
+* */
+
+class Step{
+    //初始化
+    constructor(stepArr,callback){
+
+        this.stepArr=stepArr;
+        this.curIndex=0;
+        this.isPaused=false;
+        this.nextMode=null;
+        this.curStep=this.stepArr[this.curIndex];
+        this.hasRunTimes={};
+        this.stepArr.forEach( (step)=> {
+            this.hasRunTimes[step]=0;
+        })
+        this.callback=callback;
+    }
+    callback(){
+        this.go()
+    }
+    // 运行当前流程
+    run(){
+        this.curStep=this.stepArr[this.curIndex]
+        if(this.curStep){
+            this.hasRunTimes[this.curStep]++
+            this.callback&&this.callback.apply(this,[this.curStep,this.hasRunTimes[this.curStep]])
+        }
+    }
+    // 跳转到某个流程
+    go(step){
+        this.clear()
+        if(step){
+            this.curIndex=this.stepArr.indexOf(step)
+        }else{
+            this.curIndex++
+        }
+        this.run()
+    }
+
+    // 进入下一个流程
+    next(){
+        if(this.nextMode){
+            this.go(this.nextMode.nextStep)
+        }else{
+            this.go()
+        }
+    }
+
+    // 自动进入下一步
+    waitSecondAndGo(second,step){
+        if(!this.isPaused){
+            this.stopTimer()
+        }
+        const mode={
+            startTime:new Date().getTime(),
+            allSecond:second,
+            leftSecond:second*1000,
+            nextStep:step,
+            timer:null,
+        }
+
+        //获得下一步
+        if(this.nextMode==null||mode.leftSecond<this.nextMode.leftSecond){
+            this.nextMode=mode;
+        }
+
+        if(!this.isPaused){
+            this.startTimer()
+        }
+
+    }
+    // 暂停
+    pause(){
+        if(!this.isPaused){
+            this.isPaused=true;
+            this.stopTimer()
+
+        }
+
+    }
+    // 继续
+    repause(){
+        if(this.isPaused){
+            this.isPaused=false;
+            this.startTimer()
+        }
+
+    }
+    stopTimer(){
+        if(this.nextMode&&this.nextMode.timer){
+            const duration=new Date().getTime()-this.nextMode.startTime;
+            this.nextMode.leftSecond=this.nextMode.leftSecond-duration;
+
+            clearTimeout(this.nextMode.timer);
+            this.nextMode.timer=null;
+        }
+    }
+    startTimer(){
+        if(this.nextMode&&this.nextMode.timer==null){
+            this.nextMode.startTime=new Date().getTime();
+            this.nextMode.timer=setTimeout(() => {
+                this.go(this.nextMode.nextStep)
+            },this.nextMode.leftSecond)
+        }
+    }
+    // 销毁
+    clear(){
+        if(this.nextMode){
+            if(this.nextMode.timer){
+                clearTimeout(this.nextMode.timer);
+                this.nextMode.timer=null
+            }
+            this.nextMode=null
+        }
+    }
+}
+
+//基础方法
+class PointMap {
+    constructor(arr){
+        this.children=[]
+        if(Object.prototype.toString.call(arr)=="[object Array]"){
+            this.children=arr.sort(this._sort)
+        }
+    }
+    //按照x和y大小排序
+    _sort(a,b){
+        if(a.x== b.x&&a.y== b.y){
+            return 0
+        }
+        if(a.x== b.x){
+            return a.y> b.y?1:-1
+        }
+        return a.x> b.x?1:-1
+
+    }
+    //左边l到右边r是否存在p，不存在返回-1，存在返回位置
+    indexOf(p,l,r){
+        var n=this.nearOf(p,l,r)
+        if(this.children[n]&&this.children[n].x== p.x&&this.children[n].y== p.y){
+            return n
+        }else{
+            return -1
+        }
+
+    }
+    //查找离坐标最近的方块
+    nearOf(p,l,r){
+        var l=l||0,r=r||this.children.length;
+
+        while(r-l>0){
+            var m=(l+r)>>1
+
+            var mid=this.children[m]
+            //比较下坐标大小
+            var order=this._sort(p,mid)
+
+            if(order==1){
+                l=Math.max(l+1,m)
+            }else if(order==-1){
+                r=Math.min(r-1,m)
+            }else{
+                l=r=m
+            }
+        }
+
+        return (l+r)>>1
+    }
+    //插入一个坐标方块
+    add(p){
+        var n=this.nearOf(p)
+        this.children.splice(n,0,p)
+
+    }
+    //删除指定坐标的方块
+    del(p){
+        var n=this.indexOf(p)
+        if(n>-1){
+            return this.children.splice(n,1)
+        }
+    }
 }
