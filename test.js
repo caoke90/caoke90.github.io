@@ -28,6 +28,7 @@ class Node{
         this.isShow=true;
 
         this.point=Point(0,0);
+        this.velocity=Point(0,0);
         this.grid=1;
         this.angle=0;
         this.isNode=true;
@@ -254,9 +255,8 @@ class Game extends Node{
             this.world.add(circle)
             this.slumpObject.push(circle)
         }
-        this.slumpObject.sort((a,b)=>{
-            return this._sort(a.point,b.point)
-        })
+        this.calculate()
+
 
         this.slumpObject.forEach(function (sp,i) {
             sp.add(new ccText(i,Point(0,0)))
@@ -264,29 +264,15 @@ class Game extends Node{
 
 
     }
-
-    slump(){
-        for(let i=0;i<this.slumpObject.length;i++){
-            const cur=this.slumpObject[i]
-            if(cur.point.y>10){
-                cur.point.y-=0.5
-            }
-        }
-        this.slumpObject.forEach(function (cur) {
-
-            if(cur.point.y<9){
-                cur.point.y+=0.5
-            }
-            if(cur.point.x<0){
-                cur.point.x+=0.5
-            }
-            if(cur.point.x>75){
-                cur.point.x-=0.5
-            }
-        })
+    calculate(){
         this.slumpObject.sort((a,b)=>{
             return this._sort(a.point,b.point)
         })
+        //发生了碰撞
+        const callback=function (next,point,cur) {
+            // next.point=Point.add(next.point,point);
+            next.velocity=Point.add(next.velocity,point);
+        }
         for(let i=0;i<this.slumpObject.length;i++){
             const cur=this.slumpObject[i];
 
@@ -296,12 +282,12 @@ class Game extends Node{
                 if(cur.point.x-next.point.x>cur.radius+next.radius){
                     break;
                 }
-
                 const direct=Point.sub(next.point,cur.point)
                 const dist=direct.norm()
                 if(dist<=cur.radius+next.radius){
                     const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
-                    next.point=Point.add(next.point,point)
+                    // next.point=Point.add(next.point,point)
+                    callback(next,point,cur)
                 }
             }
             for(let r=i+1;r<this.slumpObject.length;r++){
@@ -314,61 +300,70 @@ class Game extends Node{
                 const dist=direct.norm()
                 if(direct.norm()<=cur.radius+next.radius){
                     const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
-                    next.point=Point.add(next.point,point)
+                    // next.point=Point.add(next.point,point)
+                    callback(next,point,cur)
                 }
             }
         }
+    }
+    slump(){
+        for(let i=0;i<this.slumpObject.length;i++){
+            const cur=this.slumpObject[i]
+            cur.velocity=Point.multiply(cur.velocity,0.98)
+            cur.point=Point.add(cur.point,cur.velocity)
+        }
 
 
+        this.calculate()
         this.progress.waitSecondAndGo(0.05,'slump')
     }
-    toggle(){
-        if(this.direct=='right'){
-            if(this.circle.point.x<this.rect.right){
-                this.circle.point.x+=1
-            }else{
-                this.rect.top-=1;
-                this.direct='bottom'
-            }
-
-        }else if(this.direct=='bottom'){
-            if(this.circle.point.y>this.rect.bottom){
-                this.circle.point.y-=1
-            }else{
-                this.rect.right-=1
-                this.direct='left'
-            }
-
-        }else if(this.direct=='left'){
-            if(this.circle.point.x>this.rect.left){
-                this.circle.point.x-=1
-            }else{
-                this.rect.bottom+=1
-                this.direct='top'
-            }
-        }else if(this.direct=='top'){
-            if(this.circle.point.y<this.rect.top){
-                this.circle.point.y+=1
-            }else{
-                this.rect.left+=1
-                this.direct='right'
-            }
-        }
-        if(this.circle.point.x==0&&this.circle.point.y==0){
-            return;
-        }
-        console.log(this.circle.point)
-        // this.world.grid=this.world.grid+this.addNum;
-        // this.world.angle+=0.3;
-        // this.world2.angle-=0.3;
-        // if(this.world.grid>100){
-        //     this.addNum=-2;
-        // }
-        // if(this.world.grid<20){
-        //     this.addNum=2;
-        // }
-        this.progress.waitSecondAndGo(0.1,'toggle')
-    }
+    // toggle(){
+    //     if(this.direct=='right'){
+    //         if(this.circle.point.x<this.rect.right){
+    //             this.circle.point.x+=1
+    //         }else{
+    //             this.rect.top-=1;
+    //             this.direct='bottom'
+    //         }
+    //
+    //     }else if(this.direct=='bottom'){
+    //         if(this.circle.point.y>this.rect.bottom){
+    //             this.circle.point.y-=1
+    //         }else{
+    //             this.rect.right-=1
+    //             this.direct='left'
+    //         }
+    //
+    //     }else if(this.direct=='left'){
+    //         if(this.circle.point.x>this.rect.left){
+    //             this.circle.point.x-=1
+    //         }else{
+    //             this.rect.bottom+=1
+    //             this.direct='top'
+    //         }
+    //     }else if(this.direct=='top'){
+    //         if(this.circle.point.y<this.rect.top){
+    //             this.circle.point.y+=1
+    //         }else{
+    //             this.rect.left+=1
+    //             this.direct='right'
+    //         }
+    //     }
+    //     if(this.circle.point.x==0&&this.circle.point.y==0){
+    //         return;
+    //     }
+    //     console.log(this.circle.point)
+    //     // this.world.grid=this.world.grid+this.addNum;
+    //     // this.world.angle+=0.3;
+    //     // this.world2.angle-=0.3;
+    //     // if(this.world.grid>100){
+    //     //     this.addNum=-2;
+    //     // }
+    //     // if(this.world.grid<20){
+    //     //     this.addNum=2;
+    //     // }
+    //     this.progress.waitSecondAndGo(0.1,'toggle')
+    // }
     touchstart([pos]){
         console.log(pos)
         console.log(this.world.ScreenToWorldPoint(pos))
