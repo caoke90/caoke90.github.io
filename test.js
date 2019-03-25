@@ -27,6 +27,34 @@ class Node{
         this.parent=null;
         this.isShow=true;
 
+        this.point=Point(0,0);
+        this.grid=1;
+        this.angle=0;
+        this.isNode=true;
+
+        this.strokeStyle=this.color16()
+    }
+    WorldToScreenGrid(grid){
+        grid=this.grid*grid;
+        if(this.parent&&this.parent.isNode){
+            grid= this.parent.WorldToScreenGrid(grid)
+        }
+        return grid;
+    }
+    WorldToScreenPoint(pos){
+        pos=Point.add(Point.rotate(Point.multiply(pos,this.grid),this.angle),this.point)
+
+        if(this.parent&&this.parent.isNode){
+            pos= this.parent.WorldToScreenPoint(pos)
+        }
+
+        return pos;
+    }
+    ScreenToWorldPoint(pos){
+        if(this.parent&&this.parent.isNode){
+            pos=this.parent.ScreenToWorldPoint(pos)
+        }
+        return Point.divide(Point.rotate(Point.sub(pos,this.point),-this.angle),this.grid);
     }
     add(node){
         if(!node.parent){
@@ -49,52 +77,16 @@ class Node{
         }
         return true;
     }
-}
-class Axeis extends Node{
-    constructor(){
-        super();
-        this.point=Point(0,0);
-        this.grid=1;
-        this.angle=0;
-        this.isAxeis=true;
-    }
-    show(){
-        for(let x=0;x<=75;x++){
-            const line=new ccLine(Point(x,0),Point(x,133))
-            line.strokeStyle='#f5f6f7'
-            this.add(line)
-        }
-
-        for(let y=0;y<=133;y++){
-            const line=new ccLine(Point(0,y),Point(75,y))
-            line.strokeStyle='#f5f6f7'
-            this.add(line)
-        }
-    }
-    WorldToScreenGrid(grid){
-        grid=this.grid*grid;
-        if(this.parent&&this.parent.isAxeis){
-            grid= this.parent.WorldToScreenGrid(grid)
-        }
-        return grid;
-    }
-    WorldToScreenPoint(pos){
-        pos=Point.add(Point.rotate(Point.multiply(pos,this.grid),this.angle),this.point)
-
-        if(this.parent&&this.parent.isAxeis){
-            pos= this.parent.WorldToScreenPoint(pos)
-        }
-
-        return pos;
-    }
-    ScreenToWorldPoint(pos){
-        if(this.parent&&this.parent.isAxeis){
-            pos=this.parent.ScreenToWorldPoint(pos)
-        }
-        return Point.divide(Point.rotate(Point.sub(pos,this.point),-this.angle),this.grid);
+    color16(){//十六进制颜色随机
+        const r = Math.floor(Math.random()*256);
+        const g = Math.floor(Math.random()*256);
+        const b = Math.floor(Math.random()*256);
+        const color = '#'+r.toString(16)+g.toString(16)+b.toString(16);
+        return color;
     }
 }
-class ccRect extends Axeis{
+
+class ccRect extends Node{
     constructor(point,width,height){
         super()
         this.point=point;
@@ -117,12 +109,12 @@ class ccRect extends Axeis{
         ctx.lineTo(arr[3].x,cc.height-arr[3].y);
         ctx.closePath();
 
-        ctx.strokeStyle="#72dd38";
+        ctx.strokeStyle=this.strokeStyle||this.color16();
         ctx.stroke();
 
     }
 }
-class ccLine extends Axeis{
+class ccLine extends Node{
     constructor(a,b){
         super()
         this.a=a;
@@ -137,11 +129,11 @@ class ccLine extends Axeis{
         ctx.beginPath();
         ctx.moveTo(a.x,cc.height-a.y);
         ctx.lineTo(b.x,cc.height-b.y);
-        ctx.strokeStyle=this.strokeStyle;
+        ctx.strokeStyle=this.strokeStyle||this.color16();
         ctx.stroke();
     }
 }
-class ccText extends Axeis{
+class ccText extends Node{
     constructor(text,point){
         super()
         this.text=text
@@ -153,12 +145,13 @@ class ccText extends Axeis{
         ctx.font="10px Arial";
         ctx.textAlign=this.textAlign||"center";
         ctx.textBaseline=this.textBaseline||"middle";
-        const point=this.WorldToScreenPoint(Point(0,0));
+        ctx.strokeStyle=this.strokeStyle||this.color16();
 
+        const point=this.WorldToScreenPoint(Point(0,0));
         ctx.fillText(this.text,point.x,cc.height-point.y);
     }
 }
-class ccCircle extends Axeis{
+class ccCircle extends Node{
     constructor(point,radius,startingAngle,endingAngle){
         super()
         this.point=point;
@@ -173,12 +166,12 @@ class ccCircle extends Axeis{
         const point=this.WorldToScreenPoint(Point(0,0));
         ctx.beginPath();
         ctx.arc(point.x,cc.height-point.y,this.WorldToScreenGrid(this.radius),this.startingAngle,this.endingAngle);
-        ctx.strokeStyle=this.strokeStyle||'#dd4c3c';
+        ctx.strokeStyle=this.strokeStyle||this.color16();
         ctx.stroke();
     }
 }
 
-class Game extends Axeis{
+class Game extends Node{
 
     constructor(){
         super()
@@ -202,7 +195,7 @@ class Game extends Axeis{
 
                 this[type]([Point(
                     e.x-cc.rect.left,
-                    cc.height-(e.y-cc.rect.top)
+                    cc.rect.bottom-e.y
                 )])
             }else if(e.type==='touchstart'||e.type==='touchmove'||e.type==='touchend'){
                 const arr=[]
@@ -210,7 +203,7 @@ class Game extends Axeis{
                     const item=e.touches[i];
                     arr.push(Point(
                         item.pageX-cc.rect.left,
-                        cc.height-(item.pageY-cc.rect.top)
+                        cc.rect.bottom-item.pageY
                     ))
                 }
                 this[type](arr)
@@ -231,7 +224,7 @@ class Game extends Axeis{
     init(){
         this.runArr=['initAxes','slump'];
 
-        this.world=new Axeis();
+        this.world=new Node();
         this.world.grid=10;
         this.add(this.world)
         this.progress=new Step(this.runArr,(step,time)=>{
@@ -245,14 +238,14 @@ class Game extends Axeis{
 
     initAxes(){
         // this.show()
-        this.world.show()
+        // this.world.show()
 
         this.progress.waitSecondAndGo();
 
-        // this.rect={
-        //     top:10,left:-10,bottom:-10,right:10
-        // }
-        // this.direct='right';
+        for(let k=0;k<100;k++){
+            const circle=new ccRect(Point(0|Math.random()*75,0|Math.random()*133),0|Math.random()*3+1,0|Math.random()*3+1)
+            this.world.add(circle)
+        }
 
         this.slumpObject=[]
         for(let k=0;k<100;k++){
@@ -382,4 +375,3 @@ class Game extends Axeis{
     }
 }
 new Game().init()
-
