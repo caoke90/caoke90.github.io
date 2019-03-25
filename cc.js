@@ -110,7 +110,7 @@ class Matrix {
     }
     //矩阵与矩阵相乘 矩阵A的行必须与矩阵B的列数相等
     multiplyMatrix(matrix){
-        if(this.Row!==matrix.Column){
+        if(this.Column!==matrix.Row){
             throw '矩阵A的行必须与矩阵B的列数相等';
         }
         const nMatrix=new Matrix([],this.Row,matrix.Column)
@@ -360,9 +360,11 @@ Point.equals=function(a,b){
 //乘 向量与数字
 Point.multiply=function(a,b){
     if(a instanceof Point&&typeof b=='number'){
+        if(b===1){return a}
         return Point(a.x*b,a.y*b)
     }
     if(b instanceof Point&&typeof a=='number'){
+        if(a===1){return b}
         return Point(a*b.x,a*b.y)
     }
 }
@@ -562,68 +564,8 @@ class Step{
     }
 }
 
-//基础方法
-class PointMap {
-    constructor(arr){
-        this.children=[]
-        if(Object.prototype.toString.call(arr)=="[object Array]"){
-            this.children=arr.sort(this._sort)
-        }
-    }
-    //按照x和y大小排序
-    _sort(a,b){
-        if(a.x== b.x&&a.y== b.y){
-            return 0
-        }
-        if(a.x== b.x){
-            return a.y> b.y?1:-1
-        }
-        return a.x> b.x?1:-1
 
-    }
-    //左边l到右边r是否存在p，不存在返回-1，存在返回位置
-    indexOf(p,l,r){
-        var n=this.nearOf(p,l,r)
-        if(this.children[n]&&this.children[n].x== p.x&&this.children[n].y== p.y){
-            return n
-        }else{
-            return -1
-        }
-
-    }
-    //查找离坐标最近的方块
-    nearOf(p,l,r){
-        var l=l||0,r=r||this.children.length;
-
-        while(r-l>0){
-            var m=(l+r)>>1
-
-            var mid=this.children[m]
-            //比较下坐标大小
-            var order=this._sort(p,mid)
-
-            if(order==1){
-                l=Math.max(l+1,m)
-            }else if(order==-1){
-                r=Math.min(r-1,m)
-            }else{
-                l=r=m
-            }
-        }
-
-        return (l+r)>>1
-    }
-    //插入一个坐标方块
-    add(p){
-        var n=this.nearOf(p)
-        this.children.splice(n,0,p)
-
-    }
-    //删除指定坐标的方块
-    del(p){
-        var n=this.indexOf(p)
-        if(n>-1){
-            return this.children.splice(n,1)
-        }
-    }
-}
+// const axeis=new Axeis2D();
+// // axeis.scale(2,3)
+// axeis.skewX(45*Math.PI/180);
+// console.log(axeis.getPoint(3,2));
