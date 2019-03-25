@@ -171,6 +171,7 @@ class ccCircle extends Node{
     }
 }
 
+
 class Game extends Node{
 
     constructor(){
@@ -225,7 +226,7 @@ class Game extends Node{
         this.runArr=['initAxes','slump'];
 
         this.world=new Node();
-        this.world.grid=10;
+        this.world.grid=7;
         this.add(this.world)
         this.progress=new Step(this.runArr,(step,time)=>{
             this[step](step,time);
@@ -242,39 +243,28 @@ class Game extends Node{
 
         this.progress.waitSecondAndGo();
 
-        for(let k=0;k<100;k++){
-            const circle=new ccRect(Point(0|Math.random()*75,0|Math.random()*133),0|Math.random()*3+1,0|Math.random()*3+1)
-            this.world.add(circle)
-        }
+        // for(let k=0;k<100;k++){
+        //     const circle=new ccRect(Point(0|Math.random()*75,0|Math.random()*133),0|Math.random()*3+1,0|Math.random()*3+1)
+        //     this.world.add(circle)
+        // }
 
         this.slumpObject=[]
         for(let k=0;k<100;k++){
-            const circle=new ccCircle(Point(0|Math.random()*75,0|Math.random()*133),0|Math.random()*3+1)
+            const circle=new ccCircle(Point(0|Math.random()*70,0|Math.random()*100),0|Math.random()*3+1)
             this.world.add(circle)
             this.slumpObject.push(circle)
         }
-        this.slumpObject=this.slumpObject.sort((a,b)=>{
+        this.slumpObject.sort((a,b)=>{
             return this._sort(a.point,b.point)
         })
+
         this.slumpObject.forEach(function (sp,i) {
-            sp.add(new ccText(sp.point.x+','+sp.point.y,Point(0,0)))
+            sp.add(new ccText(i,Point(0,0)))
         })
-        const rect=new ccRect(Point(2,2),2,2)
 
-        this.world.add(rect)
 
     }
-    //按照x和y大小排序
-    _sort(a,b){
-        if(a.x== b.x&&a.y== b.y){
-            return 0
-        }
-        if(a.x== b.x){
-            return a.y> b.y?1:-1
-        }
-        return a.x> b.x?1:-1
 
-    }
     slump(){
         for(let i=0;i<this.slumpObject.length;i++){
             const cur=this.slumpObject[i]
@@ -282,25 +272,6 @@ class Game extends Node{
                 cur.point.y-=0.5
             }
         }
-
-        for(let i=0;i<this.slumpObject.length;i++){
-            const cur=this.slumpObject[i]
-            for(let k=0;k<this.slumpObject.length;k++){
-                if(i===k){
-                    continue;
-                }
-                const next=this.slumpObject[k]
-                const dist=Point.dist(cur.point,next.point)
-                const num=cur.radius+next.radius-dist
-                if(num>0){
-                    const point=Point.multiply(Point.sub(next.point,cur.point),(cur.radius+next.radius-num/2)/(dist));
-                    next.point=Point.add(cur.point,point)
-
-
-                }
-            }
-        }
-
         this.slumpObject.forEach(function (cur) {
 
             if(cur.point.y<9){
@@ -313,6 +284,42 @@ class Game extends Node{
                 cur.point.x-=0.5
             }
         })
+        this.slumpObject.sort((a,b)=>{
+            return this._sort(a.point,b.point)
+        })
+        for(let i=0;i<this.slumpObject.length;i++){
+            const cur=this.slumpObject[i];
+
+            for(let l=i-1;l>0;l--){
+                const next=this.slumpObject[l]
+                //不在范围内
+                if(cur.point.x-next.point.x>cur.radius+next.radius){
+                    break;
+                }
+
+                const direct=Point.sub(next.point,cur.point)
+                const dist=direct.norm()
+                if(dist<=cur.radius+next.radius){
+                    const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
+                    next.point=Point.add(next.point,point)
+                }
+            }
+            for(let r=i+1;r<this.slumpObject.length;r++){
+                const next=this.slumpObject[r]
+                //不在范围内
+                if(next.point.x-cur.point.x>cur.radius+next.radius){
+                    break;
+                }
+                const direct=Point.sub(next.point,cur.point)
+                const dist=direct.norm()
+                if(direct.norm()<=cur.radius+next.radius){
+                    const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
+                    next.point=Point.add(next.point,point)
+                }
+            }
+        }
+
+
         this.progress.waitSecondAndGo(0.05,'slump')
     }
     toggle(){
@@ -373,5 +380,18 @@ class Game extends Node{
     touchend([pos]){
 
     }
+    //按照x和y大小排序
+    _sort(a,b){
+        if(a.x== b.x&&a.y== b.y){
+            return 0
+        }
+        if(a.x== b.x){
+            return a.y> b.y?1:-1
+        }
+        return a.x> b.x?1:-1
+
+    }
 }
-new Game().init()
+const game=new Game()
+game.init()
+game.render()
