@@ -226,9 +226,6 @@ class Game extends Node{
     init(){
         this.runArr=['initAxes','slump'];
 
-        this.world=new Node();
-        this.world.grid=7;
-        this.add(this.world)
         this.progress=new Step(this.runArr,(step,time)=>{
             this[step](step,time);
             cc.ctx.clearRect(0,0,cc.width,cc.height);
@@ -239,6 +236,10 @@ class Game extends Node{
     }
 
     initAxes(){
+        this.world=new Node();
+        this.world.point=Point(cc.width/2-35*7,cc.height/2-40*7)
+        this.world.grid=7;
+        this.add(this.world)
         // this.show()
         // this.world.show()
 
@@ -248,14 +249,22 @@ class Game extends Node{
         //     const circle=new ccRect(Point(0|Math.random()*75,0|Math.random()*133),0|Math.random()*3+1,0|Math.random()*3+1)
         //     this.world.add(circle)
         // }
+        const line=new ccRect(Point(35,40),70,80)
+        this.world.add(line)
 
         this.slumpObject=[]
         for(let k=0;k<100;k++){
-            const circle=new ccCircle(Point(0|Math.random()*70,0|Math.random()*100),0|Math.random()*3+1)
+            const circle=new ccCircle(Point(0|Math.random()*55+5,0|Math.random()*60+5),0|Math.random()*2+1)
             this.world.add(circle)
             this.slumpObject.push(circle)
         }
-        this.calculate()
+
+        this.slumpObject[0].velocity=Point(1,1)
+        this.calculate(function (cur,next,direct,dist) {
+            const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
+            next.point=Point.add(next.point,point);
+
+        })
 
 
         this.slumpObject.forEach(function (sp,i) {
@@ -264,18 +273,13 @@ class Game extends Node{
 
 
     }
-    calculate(){
+    calculate(callback){
         this.slumpObject.sort((a,b)=>{
             return this._sort(a.point,b.point)
         })
         //发生了碰撞
-        const callback=function (next,point,cur) {
-            // next.point=Point.add(next.point,point);
-            next.velocity=Point.add(next.velocity,point);
-        }
         for(let i=0;i<this.slumpObject.length;i++){
             const cur=this.slumpObject[i];
-
             for(let l=i-1;l>0;l--){
                 const next=this.slumpObject[l]
                 //不在范围内
@@ -287,7 +291,7 @@ class Game extends Node{
                 if(dist<=cur.radius+next.radius){
                     const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
                     // next.point=Point.add(next.point,point)
-                    callback(next,point,cur)
+                    callback(cur,next,direct,dist)
                 }
             }
             for(let r=i+1;r<this.slumpObject.length;r++){
@@ -298,10 +302,10 @@ class Game extends Node{
                 }
                 const direct=Point.sub(next.point,cur.point)
                 const dist=direct.norm()
-                if(direct.norm()<=cur.radius+next.radius){
+                if(dist<=cur.radius+next.radius){
                     const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
                     // next.point=Point.add(next.point,point)
-                    callback(next,point,cur)
+                    callback(cur,next,direct,dist)
                 }
             }
         }
@@ -309,61 +313,38 @@ class Game extends Node{
     slump(){
         for(let i=0;i<this.slumpObject.length;i++){
             const cur=this.slumpObject[i]
-            cur.velocity=Point.multiply(cur.velocity,0.98)
+            // cur.velocity=Point.multiply(cur.velocity,0.99)
             cur.point=Point.add(cur.point,cur.velocity)
+            if(cur.point.x<0){
+                cur.velocity.x=-cur.velocity.x;
+            }
+            if(cur.point.x>70){
+                cur.velocity.x=-cur.velocity.x;
+            }
+            if(cur.point.y<0){
+                cur.velocity.y=-cur.velocity.y;
+            }
+            if(cur.point.y>80){
+                cur.velocity.y=-cur.velocity.y;
+            }
         }
 
+        this.calculate(function (cur,next,direct,dist) {
+            //左碰撞和右碰撞
+            if((direct.x>=0&&cur.velocity.x>0)||(direct.y>=0&&cur.velocity.y>0)||(direct.x<=0&&cur.velocity.x<0)||(direct.y<=0&&cur.velocity.y<0)){
+                const vec1=Line.pointProjLine(cur.velocity,Point(0,0),direct)
+                cur.velocity=Point.sub(cur.velocity,vec1)
+                next.velocity=Point.add(next.velocity,vec1);
+            }
 
-        this.calculate()
+        })
+        this.calculate(function (cur,next,direct,dist) {
+            const point = Point.multiply(direct, (cur.radius + next.radius - dist) / dist);
+            next.point = Point.add(next.point, point);
+        })
         this.progress.waitSecondAndGo(0.05,'slump')
     }
-    // toggle(){
-    //     if(this.direct=='right'){
-    //         if(this.circle.point.x<this.rect.right){
-    //             this.circle.point.x+=1
-    //         }else{
-    //             this.rect.top-=1;
-    //             this.direct='bottom'
-    //         }
-    //
-    //     }else if(this.direct=='bottom'){
-    //         if(this.circle.point.y>this.rect.bottom){
-    //             this.circle.point.y-=1
-    //         }else{
-    //             this.rect.right-=1
-    //             this.direct='left'
-    //         }
-    //
-    //     }else if(this.direct=='left'){
-    //         if(this.circle.point.x>this.rect.left){
-    //             this.circle.point.x-=1
-    //         }else{
-    //             this.rect.bottom+=1
-    //             this.direct='top'
-    //         }
-    //     }else if(this.direct=='top'){
-    //         if(this.circle.point.y<this.rect.top){
-    //             this.circle.point.y+=1
-    //         }else{
-    //             this.rect.left+=1
-    //             this.direct='right'
-    //         }
-    //     }
-    //     if(this.circle.point.x==0&&this.circle.point.y==0){
-    //         return;
-    //     }
-    //     console.log(this.circle.point)
-    //     // this.world.grid=this.world.grid+this.addNum;
-    //     // this.world.angle+=0.3;
-    //     // this.world2.angle-=0.3;
-    //     // if(this.world.grid>100){
-    //     //     this.addNum=-2;
-    //     // }
-    //     // if(this.world.grid<20){
-    //     //     this.addNum=2;
-    //     // }
-    //     this.progress.waitSecondAndGo(0.1,'toggle')
-    // }
+
     touchstart([pos]){
         console.log(pos)
         console.log(this.world.ScreenToWorldPoint(pos))
