@@ -212,7 +212,7 @@ class userCircle extends ccCircle{
         this.line=line;
     }
     render(){
-        this.line.b=Point.multiply(this.velocity,(this.radius/2*3)/this.velocity.norm());
+        this.line.b=Point.multiply(this.velocity,(this.radius/4*5)/this.velocity.norm());
         super.render()
     }
 }
