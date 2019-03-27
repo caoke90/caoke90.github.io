@@ -32,6 +32,7 @@ class Node{
         this.grid=1;
         this.angle=0;
         this.isNode=true;
+        this.isStatic=false;
 
         this.strokeStyle=this.color16()
     }
@@ -90,6 +91,7 @@ class Node{
 class ccRect extends Node{
     constructor(point,width,height){
         super()
+        this.isRect=true;
         this.point=point;
         this.width=width;
         this.height=height;
@@ -129,6 +131,7 @@ class ccRect extends Node{
 class ccLine extends Node{
     constructor(a,b){
         super()
+        this.isLine=true;
         this.a=a;
         this.b=b;
 
@@ -288,19 +291,14 @@ class Game extends Node{
         // this.show()
         // this.world.show()
 
-
         this.progress.waitSecondAndGo();
 
         // for(let k=0;k<100;k++){
         //     const circle=new ccRect(Point(0|Math.random()*75,0|Math.random()*133),0|Math.random()*3+1,0|Math.random()*3+1)
         //     this.world.add(circle)
         // }
-
-        // const circle=new userCircle(Point(0|Math.random()*55+5,0|Math.random()*60+5),2)
-        // this.world.add(circle)
-        // circle.velocity=Point(1,1)
-
-
+        const circle=new ccRect(Point(35,40),70,80)
+        this.world.add(circle)
 
         this.slumpObject=[]
         for(let k=0;k<100;k++){
@@ -311,14 +309,13 @@ class Game extends Node{
         this.slumpObject[0].velocity=Point(1,1)
         this.slumpObject.forEach(function (sp,i) {
             sp.add(new ccText(i,Point(0,0)))
-            // const line=new ccLine(Point(0,0),sp.velocity)
-            // sp.add(line)
         })
 
         this.slumpObject.sort( (sp1,sp2)=> {
             return this._sort(sp1.point,sp2.point)
         })
         this.geli()
+        console.log('geli')
 
     }
     geli(){
@@ -386,6 +383,30 @@ class Game extends Node{
         return false;
     }
     slump(){
+
+
+        this.calculate(function (user,next) {
+
+            const direct=Point.sub(next.point,user.point);
+            const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
+            const y1=Point.sub(user.velocity,x1);
+
+            const x2=Line.pointProjLine(next.velocity,Point(0,0),direct);
+            const y2=Point.sub(next.velocity,x2);
+
+            if(Point.dot(direct,Point.sub(x1,x2))>0){
+                user.velocity=Point.add(x2,y1);
+                next.velocity=Point.add(x1,y2);
+            }
+
+
+        })
+        let vec=Point(0,0)
+        this.slumpObject.forEach((sp,i)=>{
+            vec=Point.add(vec,sp.velocity)
+        })
+        console.log(vec)
+        //重力改变
         for(let i=0;i<this.slumpObject.length;i++){
             const cur=this.slumpObject[i]
             // cur.velocity=Point.multiply(cur.velocity,0.99)
@@ -403,34 +424,6 @@ class Game extends Node{
                 cur.velocity.y=-cur.velocity.y;
             }
         }
-
-        this.calculate(function (cur,next) {
-            if(next.velocity.x===0&&next.velocity.y===0){return;}
-            const direct=Point.sub(cur.point,next.point);
-            //左碰撞和右碰撞
-            if(Point.dot(direct,next.velocity)>0){
-                const vec1=Line.pointProjLine(next.velocity,Point(0,0),direct)
-                cur.xVelocity=vec1;
-                next.yVelocity=Point.sub(next.velocity,vec1);
-            }
-
-        })
-        let velc=Point(0,0)
-        this.slumpObject.forEach((sp,i)=>{
-            if(sp.xVelocity&&sp.yVelocity){
-                sp.velocity=Point.add(sp.xVelocity,sp.yVelocity);
-                sp.xVelocity=null;
-                sp.yVelocity=null;
-            }else if(sp.xVelocity){
-                sp.velocity=sp.xVelocity;
-                sp.xVelocity=null;
-            }else if(sp.yVelocity){
-                sp.velocity=sp.yVelocity;
-                sp.yVelocity=null;
-            }
-            velc=Point.add(velc,sp.velocity)
-        })
-        console.log(velc)
         this.progress.waitSecondAndGo(0.05,'slump')
     }
 
