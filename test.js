@@ -306,6 +306,10 @@ class Game extends Node{
             this.world.add(circle)
             this.slumpObject.push(circle)
         }
+        const line=new ccLine(Point(20,60),Point(35,30))
+        this.world.add(line)
+        this.slumpObject.push(line)
+
         this.slumpObject[0].velocity=Point(1,1)
         this.slumpObject.forEach(function (sp,i) {
             sp.add(new ccText(i,Point(0,0)))
@@ -357,6 +361,9 @@ class Game extends Node{
                 return true;
             }
         }
+        if(cur.isCirle&&next.isLine){
+            return Line.dis_point_segment(cur.point,next.a,next.b)<cur.radius
+        }
         //矩阵、矩阵
         if(cur instanceof ccRect&&next instanceof ccRect){
             if(
@@ -386,17 +393,28 @@ class Game extends Node{
 
 
         this.calculate(function (user,next) {
+            if(user.isCirle&&next.isCirle){
+                const direct=Point.sub(next.point,user.point);
+                const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
+                const y1=Point.sub(user.velocity,x1);
 
-            const direct=Point.sub(next.point,user.point);
-            const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
-            const y1=Point.sub(user.velocity,x1);
+                const x2=Line.pointProjLine(next.velocity,Point(0,0),direct);
+                const y2=Point.sub(next.velocity,x2);
 
-            const x2=Line.pointProjLine(next.velocity,Point(0,0),direct);
-            const y2=Point.sub(next.velocity,x2);
+                if(Point.dot(direct,Point.sub(x1,x2))>0){
+                    user.velocity=Point.add(x2,y1);
+                    next.velocity=Point.add(x1,y2);
+                }
+            }
+            if(user.isCirle&&next.isLine){
+                const direct=Point.sub(Line.pointProjLine(user.point,next.a,next.b),user.point);
+                const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
+                const y1=Point.sub(user.velocity,x1);
 
-            if(Point.dot(direct,Point.sub(x1,x2))>0){
-                user.velocity=Point.add(x2,y1);
-                next.velocity=Point.add(x1,y2);
+                if(Point.dot(direct,x1)>0){
+                    user.velocity=Point.add(Point(-x1.x,-x1.y),y1);
+                }
+
             }
 
 
