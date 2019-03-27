@@ -297,8 +297,8 @@ class Game extends Node{
         //     const circle=new ccRect(Point(0|Math.random()*75,0|Math.random()*133),0|Math.random()*3+1,0|Math.random()*3+1)
         //     this.world.add(circle)
         // }
-        const circle=new ccRect(Point(35,40),70,80)
-        this.world.add(circle)
+        // const circle=new ccRect(Point(35,40),70,80)
+        // this.world.add(circle)
 
         this.slumpObject=[]
         for(let k=0;k<100;k++){
@@ -306,6 +306,22 @@ class Game extends Node{
             this.world.add(circle)
             this.slumpObject.push(circle)
         }
+        const line1=new ccLine(Point(0,0),Point(0,80))
+        this.world.add(line1)
+        this.slumpObject.push(line1)
+
+        const line2=new ccLine(Point(0,0),Point(70,0))
+        this.world.add(line2)
+        this.slumpObject.push(line2)
+
+        const line3=new ccLine(Point(0,80),Point(70,70))
+        this.world.add(line3)
+        this.slumpObject.push(line3)
+
+        const line4=new ccLine(Point(70,0),Point(70,80))
+        this.world.add(line4)
+        this.slumpObject.push(line4)
+
         const line=new ccLine(Point(20,60),Point(35,30))
         this.world.add(line)
         this.slumpObject.push(line)
@@ -429,18 +445,18 @@ class Game extends Node{
             const cur=this.slumpObject[i]
             // cur.velocity=Point.multiply(cur.velocity,0.99)
             cur.point=Point.add(cur.point,cur.velocity)
-            if(cur.point.x<0){
-                cur.velocity.x=-cur.velocity.x;
-            }
-            if(cur.point.x>70){
-                cur.velocity.x=-cur.velocity.x;
-            }
-            if(cur.point.y<0){
-                cur.velocity.y=-cur.velocity.y;
-            }
-            if(cur.point.y>80){
-                cur.velocity.y=-cur.velocity.y;
-            }
+            // if(cur.point.x<0){
+            //     cur.velocity.x=-cur.velocity.x;
+            // }
+            // if(cur.point.x>70){
+            //     cur.velocity.x=-cur.velocity.x;
+            // }
+            // if(cur.point.y<0){
+            //     cur.velocity.y=-cur.velocity.y;
+            // }
+            // if(cur.point.y>80){
+            //     cur.velocity.y=-cur.velocity.y;
+            // }
         }
         this.progress.waitSecondAndGo(0.05,'slump')
     }
