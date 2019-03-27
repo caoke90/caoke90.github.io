@@ -94,6 +94,17 @@ class ccRect extends Node{
         this.width=width;
         this.height=height;
     }
+    getBoundingRect(){
+        this.boundingRect={
+            x:this.point.x,
+            y:this.point.y,
+            top:this.point.y+this.height/2,
+            bottom:this.point.y-this.height/2,
+            left:this.point.x-this.width/2,
+            right:this.point.x+this.width/2,
+        }
+        return this.boundingRect;
+    }
     render(){
         if(!super.render()){return;}
         const ctx=cc.ctx;
@@ -121,6 +132,16 @@ class ccLine extends Node{
         this.a=a;
         this.b=b;
 
+    }
+    getBoundingRect(){
+        const rect=this.boundingRect={}
+        rect.left=Math.min(this.a.x,this.b.x);
+        rect.right=Math.max(this.a.x,this.b.x);
+        rect.top=Math.max(this.a.y,this.b.y);
+        rect.bottom=Math.min(this.a.y,this.b.y);
+        rect.x=(this.a.x+this.b.x)/2;
+        rect.y=(this.a.y+this.b.y)/2;
+        return rect;
     }
     render(){
         if(!super.render()){return;}
@@ -155,11 +176,23 @@ class ccText extends Node{
 class ccCircle extends Node{
     constructor(point,radius,startingAngle,endingAngle){
         super()
+        this.isCirle=true;
         this.point=point;
         this.radius=radius;
         this.startingAngle=startingAngle||0;
         this.endingAngle=endingAngle||2*Math.PI;
 
+    }
+    getBoundingRect(){
+        this.boundingRect={
+            x:this.point.x,
+            y:this.point.y,
+            top:this.point.y+this.radius,
+            bottom:this.point.y-this.radius,
+            left:this.point.x-this.radius,
+            right:this.point.x+this.radius,
+        }
+        return this.boundingRect;
     }
     render(){
         if(!super.render()){return;}
@@ -171,7 +204,18 @@ class ccCircle extends Node{
         ctx.stroke();
     }
 }
-
+class userCircle extends ccCircle{
+    constructor(point,radius,startingAngle,endingAngle){
+        super(point,radius,startingAngle,endingAngle);
+        const line=new ccLine(Point(0,0),Point.multiply(this.velocity,(this.radius/2*3)/this.velocity.norm()))
+        this.add(line)
+        this.line=line;
+    }
+    render(){
+        this.line.b=Point.multiply(this.velocity,(this.radius/2*3)/this.velocity.norm());
+        super.render()
+    }
+}
 
 class Game extends Node{
 
@@ -233,6 +277,7 @@ class Game extends Node{
         })
         this.progress.run();
 
+
     }
 
     initAxes(){
@@ -243,72 +288,102 @@ class Game extends Node{
         // this.show()
         // this.world.show()
 
+
         this.progress.waitSecondAndGo();
 
         // for(let k=0;k<100;k++){
         //     const circle=new ccRect(Point(0|Math.random()*75,0|Math.random()*133),0|Math.random()*3+1,0|Math.random()*3+1)
         //     this.world.add(circle)
         // }
-        const line=new ccRect(Point(35,40),70,80)
-        this.world.add(line)
+
+        // const circle=new userCircle(Point(0|Math.random()*55+5,0|Math.random()*60+5),2)
+        // this.world.add(circle)
+        // circle.velocity=Point(1,1)
+
+
 
         this.slumpObject=[]
         for(let k=0;k<100;k++){
-            const circle=new ccCircle(Point(0|Math.random()*55+5,0|Math.random()*60+5),0|Math.random()*2+1)
+            const circle=new userCircle(Point(0|Math.random()*55+5,0|Math.random()*60+5),2)
             this.world.add(circle)
             this.slumpObject.push(circle)
         }
-
         this.slumpObject[0].velocity=Point(1,1)
-        this.calculate(function (cur,next,direct,dist) {
-            const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
-            next.point=Point.add(next.point,point);
-
-        })
-
-
         this.slumpObject.forEach(function (sp,i) {
             sp.add(new ccText(i,Point(0,0)))
+            // const line=new ccLine(Point(0,0),sp.velocity)
+            // sp.add(line)
         })
 
+        this.slumpObject.sort( (sp1,sp2)=> {
+            return this._sort(sp1.point,sp2.point)
+        })
+        this.geli()
+
+    }
+    geli(){
+        let index=0;
+        this.calculate((cur,next) =>{
+            const direct=Point.sub(cur.point,next.point);
+            const dist=direct.norm()
+            const point=Point.multiply(direct,(cur.radius+next.radius+0.1-dist)/dist);
+            cur.point=Point.add(cur.point,point);
+            index++;
+        })
+        if(index!==0){
+            this.geli()
+        }
 
     }
     calculate(callback){
-        this.slumpObject.sort((a,b)=>{
-            return this._sort(a.point,b.point)
-        })
         //发生了碰撞
         for(let i=0;i<this.slumpObject.length;i++){
             const cur=this.slumpObject[i];
-            for(let l=i-1;l>0;l--){
-                const next=this.slumpObject[l]
-                //不在范围内
-                if(cur.point.x-next.point.x>cur.radius+next.radius){
-                    break;
+            for(let k=0;k<this.slumpObject.length;k++){
+                if(i!==k){
+                    const next=this.slumpObject[k]
+                    if(this.isCollision(cur,next)){
+                        callback(cur,next)
+                        break;
+                    }
                 }
-                const direct=Point.sub(next.point,cur.point)
-                const dist=direct.norm()
-                if(dist<=cur.radius+next.radius){
-                    const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
-                    // next.point=Point.add(next.point,point)
-                    callback(cur,next,direct,dist)
-                }
-            }
-            for(let r=i+1;r<this.slumpObject.length;r++){
-                const next=this.slumpObject[r]
-                //不在范围内
-                if(next.point.x-cur.point.x>cur.radius+next.radius){
-                    break;
-                }
-                const direct=Point.sub(next.point,cur.point)
-                const dist=direct.norm()
-                if(dist<=cur.radius+next.radius){
-                    const point=Point.multiply(direct,(cur.radius+next.radius-dist)/dist);
-                    // next.point=Point.add(next.point,point)
-                    callback(cur,next,direct,dist)
-                }
+
             }
         }
+    }
+    isCollision(left,right){
+        let cur=left,next=right;
+        //圆、圆
+        if(cur.isCirle&&next.isCirle){
+            const dist=Point.sub(next.point,cur.point).norm()
+            if(dist<cur.radius+next.radius){
+                return true;
+            }
+        }
+        //矩阵、矩阵
+        if(cur instanceof ccRect&&next instanceof ccRect){
+            if(
+                Math.abs(cur.point.x - next.point.x) < cur.width/2 + next.width/2 //横向判断
+                &&
+                Math.abs(cur.point.y - next.point.y) < cur.height/2 + next.height/2 //纵向判断
+            ){
+                return true;
+            }
+        }
+        //圆、矩阵
+        if((left instanceof ccCircle&&right instanceof ccRect)||(right instanceof ccCircle&&left instanceof ccRect)){
+            if(right instanceof ccCircle){
+                cur=right;next=left;
+            }
+            if(
+                Math.abs(cur.point.x - next.point.x) < cur.radius + next.width/2 //横向判断
+                &&
+                Math.abs(cur.point.y - next.point.y) < cur.radius + next.height/2 //纵向判断
+            ){
+                return true;
+            }
+        }
+        return false;
     }
     slump(){
         for(let i=0;i<this.slumpObject.length;i++){
@@ -329,19 +404,33 @@ class Game extends Node{
             }
         }
 
-        this.calculate(function (cur,next,direct,dist) {
+        this.calculate(function (cur,next) {
+            if(next.velocity.x===0&&next.velocity.y===0){return;}
+            const direct=Point.sub(cur.point,next.point);
             //左碰撞和右碰撞
-            if((direct.x>=0&&cur.velocity.x>0)||(direct.y>=0&&cur.velocity.y>0)||(direct.x<=0&&cur.velocity.x<0)||(direct.y<=0&&cur.velocity.y<0)){
-                const vec1=Line.pointProjLine(cur.velocity,Point(0,0),direct)
-                cur.velocity=Point.sub(cur.velocity,vec1)
-                next.velocity=Point.add(next.velocity,vec1);
+            if(Point.dot(direct,next.velocity)>0){
+                const vec1=Line.pointProjLine(next.velocity,Point(0,0),direct)
+                cur.xVelocity=vec1;
+                next.yVelocity=Point.sub(next.velocity,vec1);
             }
 
         })
-        this.calculate(function (cur,next,direct,dist) {
-            const point = Point.multiply(direct, (cur.radius + next.radius - dist) / dist);
-            next.point = Point.add(next.point, point);
+        let velc=Point(0,0)
+        this.slumpObject.forEach((sp,i)=>{
+            if(sp.xVelocity&&sp.yVelocity){
+                sp.velocity=Point.add(sp.xVelocity,sp.yVelocity);
+                sp.xVelocity=null;
+                sp.yVelocity=null;
+            }else if(sp.xVelocity){
+                sp.velocity=sp.xVelocity;
+                sp.xVelocity=null;
+            }else if(sp.yVelocity){
+                sp.velocity=sp.yVelocity;
+                sp.yVelocity=null;
+            }
+            velc=Point.add(velc,sp.velocity)
         })
+        console.log(velc)
         this.progress.waitSecondAndGo(0.05,'slump')
     }
 
