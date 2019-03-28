@@ -29,6 +29,7 @@ class Node{
 
         this.point=Point(0,0);
         this.velocity=Point(0,0);
+        this.mg=1;
         this.grid=1;
         this.angle=0;
         this.isNode=true;
@@ -51,6 +52,9 @@ class Node{
         }
 
         return pos;
+    }
+    WorldToWorldPoint(pos){
+        return Point.add(Point.rotate(Point.multiply(pos,this.grid),this.angle),this.point);
     }
     ScreenToWorldPoint(pos){
         if(this.parent&&this.parent.isNode){
@@ -96,17 +100,6 @@ class ccRect extends Node{
         this.width=width;
         this.height=height;
     }
-    getBoundingRect(){
-        this.boundingRect={
-            x:this.point.x,
-            y:this.point.y,
-            top:this.point.y+this.height/2,
-            bottom:this.point.y-this.height/2,
-            left:this.point.x-this.width/2,
-            right:this.point.x+this.width/2,
-        }
-        return this.boundingRect;
-    }
     render(){
         if(!super.render()){return;}
         const ctx=cc.ctx;
@@ -129,22 +122,12 @@ class ccRect extends Node{
     }
 }
 class ccLine extends Node{
-    constructor(a,b){
+    constructor(a,b,point){
         super()
         this.isLine=true;
         this.a=a;
         this.b=b;
 
-    }
-    getBoundingRect(){
-        const rect=this.boundingRect={}
-        rect.left=Math.min(this.a.x,this.b.x);
-        rect.right=Math.max(this.a.x,this.b.x);
-        rect.top=Math.max(this.a.y,this.b.y);
-        rect.bottom=Math.min(this.a.y,this.b.y);
-        rect.x=(this.a.x+this.b.x)/2;
-        rect.y=(this.a.y+this.b.y)/2;
-        return rect;
     }
     render(){
         if(!super.render()){return;}
@@ -185,17 +168,6 @@ class ccCircle extends Node{
         this.startingAngle=startingAngle||0;
         this.endingAngle=endingAngle||2*Math.PI;
 
-    }
-    getBoundingRect(){
-        this.boundingRect={
-            x:this.point.x,
-            y:this.point.y,
-            top:this.point.y+this.radius,
-            bottom:this.point.y-this.radius,
-            left:this.point.x-this.radius,
-            right:this.point.x+this.radius,
-        }
-        return this.boundingRect;
     }
     render(){
         if(!super.render()){return;}
@@ -302,8 +274,10 @@ class Game extends Node{
 
         this.slumpObject=[]
         for(let k=0;k<100;k++){
-            const sp=new userCircle(Point(0|Math.random()*55+5,0|Math.random()*60+5),2)
+            const r=0|Math.random()*3+1;
+            const sp=new userCircle(Point(0|Math.random()*55+5,0|Math.random()*60+5),r)
             this.world.add(sp)
+            sp.mg=r*r;
             this.slumpObject.push(sp)
             sp.add(new ccText(k,Point(0,0)))
         }
@@ -323,8 +297,14 @@ class Game extends Node{
         this.world.add(line4)
         this.slumpObject.push(line4)
 
-        const line=new ccLine(Point(20,60),Point(35,30))
+        const line=new ccLine(Point(-15,15),Point(15,-15))
         this.world.add(line)
+        line.point=Point(40,30)
+        line1.isStatic=true;
+        line2.isStatic=true;
+        line3.isStatic=true;
+        line4.isStatic=true;
+        line.isStatic=true;
         this.slumpObject.push(line)
 
         this.slumpObject[0].velocity=Point(1,1)
@@ -378,8 +358,10 @@ class Game extends Node{
             }
         }
         if(cur.isCirle&&next.isLine){
-            if(Line.dis_point_segment(cur.point,next.a,next.b)<cur.radius){
-                const p=cur.point,s=next.a,t=next.b;
+            const p=cur.point
+            const s=next.WorldToWorldPoint(next.a)
+            const t=next.WorldToWorldPoint(next.b)
+            if(Line.dis_point_segment(p,s,t)<cur.radius){
                 if(Math.cmp(Point.dot(Point.sub(p,s),Point.sub(t,s)))<0){
                     if(Point.sub(p,s).norm()<cur.radius){
                         return s;
@@ -396,11 +378,11 @@ class Game extends Node{
             }
         }
         //矩阵、矩阵
-        if(cur instanceof ccRect&&next instanceof ccRect){
+        if(cur.isRect&&next.isRect){
             if(
-                Math.abs(cur.point.x - next.point.x) < cur.width/2 + next.width/2 //横向判断
+                Math.abs(cur.point.x - next.point.x) < (cur.width+next.width)/2 //横向判断
                 &&
-                Math.abs(cur.point.y - next.point.y) < cur.height/2 + next.height/2 //纵向判断
+                Math.abs(cur.point.y - next.point.y) < (cur.height+next.height)/2 //纵向判断
             ){
                 return true;
             }
@@ -425,18 +407,23 @@ class Game extends Node{
 
         this.calculate(function (user,next,point) {
             const direct=Point.sub(point,user.point);
+
             //是否发生碰撞
             if(Point.dot(direct,Point.sub(user.velocity,next.velocity))>0){
                 if(user.isCirle&&next.isCirle){
+                    const m1=user.mg;
+                    const m2=next.mg;
                     const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
                     const y1=Point.sub(user.velocity,x1);
 
                     const x2=Line.pointProjLine(next.velocity,Point(0,0),direct);
                     const y2=Point.sub(next.velocity,x2);
-                    user.velocity=Point.add(x2,y1);
-                    next.velocity=Point.add(x1,y2);
+
+                    user.velocity=Point.add(Point.divide(Point.add(Point.multiply(m1-m2,x1),Point.multiply(2*m2,x2)),m1+m2),y1);
+                    next.velocity=Point.add(Point.divide(Point.add(Point.multiply(m2-m1,x2),Point.multiply(2*m1,x1)),m1+m2),y2);
+
                 }
-                if(user.isCirle&&next.isLine){
+                if(user.isCirle&&next.isStatic){
                     const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
                     const y1=Point.sub(user.velocity,x1);
                     user.velocity=Point.add(Point(-x1.x,-x1.y),y1);
@@ -444,13 +431,14 @@ class Game extends Node{
             }
 
 
+        })
+        // this.line.angle+=Math.PI/90;
 
-        })
-        let vec=Point(0,0)
-        this.slumpObject.forEach((sp,i)=>{
-            vec=Point.add(vec,sp.velocity)
-        })
-        console.log(vec)
+        // let vec=Point(0,0)
+        // this.slumpObject.forEach((sp,i)=>{
+        //     vec=Point.add(vec,sp.velocity)
+        // })
+        // console.log(vec)
         //重力改变
         for(let i=0;i<this.slumpObject.length;i++){
             const cur=this.slumpObject[i]
