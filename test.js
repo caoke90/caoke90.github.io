@@ -413,23 +413,31 @@ class Game extends Node{
             }
             if(user.isCirle&&next.isCirle){
                 const direct=Point.sub(next.point,user.point);
-                const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
-                const y1=Point.sub(user.velocity,x1);
 
-                const x2=Line.pointProjLine(next.velocity,Point(0,0),direct);
-                const y2=Point.sub(next.velocity,x2);
+                if(Point.dot(direct,Point.sub(user.velocity,next.velocity))>0){
+                    const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
+                    const y1=Point.sub(user.velocity,x1);
 
-                if(Point.dot(direct,Point.sub(x1,x2))>0){
+                    const x2=Line.pointProjLine(next.velocity,Point(0,0),direct);
+                    const y2=Point.sub(next.velocity,x2);
                     user.velocity=Point.add(x2,y1);
                     next.velocity=Point.add(x1,y2);
                 }
             }
             if(user.isCirle&&next.isLine){
-                const direct=Point.sub(Line.pointProjLine(user.point,next.a,next.b),user.point);
-                const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
-                const y1=Point.sub(user.velocity,x1);
+                let  direct;
+                if(Math.cmp(Point.dot(Point.sub(user.point,next.a),Point.sub(next.b,next.a)))<0){
+                    direct=Point.sub(next.a,user.point);
+                }
+                if(Math.cmp(Point.dot(Point.sub(user.point,next.b),Point.sub(next.a,next.b)))<0){
+                    direct=Point.sub(next.b,user.point);
+                }else{
+                    direct=Point.sub(Line.pointProjLine(user.point,next.a,next.b),user.point);
+                }
 
-                if(Point.dot(direct,x1)>0){
+                if(Point.dot(direct,user.velocity)>0){
+                    const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
+                    const y1=Point.sub(user.velocity,x1);
                     user.velocity=Point.add(Point(-x1.x,-x1.y),y1);
                 }
 
