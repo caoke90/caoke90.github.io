@@ -358,8 +358,9 @@ class Game extends Node{
             for(let k=0;k<this.slumpObject.length;k++){
                 if(i!==k){
                     const next=this.slumpObject[k]
-                    if(this.isCollision(cur,next)){
-                        callback(cur,next)
+                    const point=this.isCollision(cur,next)
+                    if(point){
+                        callback(cur,next,point)
                         break;
                     }
                 }
@@ -373,11 +374,26 @@ class Game extends Node{
         if(cur.isCirle&&next.isCirle){
             const dist=Point.sub(next.point,cur.point).norm()
             if(dist<cur.radius+next.radius){
-                return true;
+                return Point.divide(Point.add(Point.multiply(cur.point,next.radius),Point.multiply(next.point,cur.radius)),cur.radius+next.radius);
             }
         }
         if(cur.isCirle&&next.isLine){
-            return Line.dis_point_segment(cur.point,next.a,next.b)<cur.radius
+            if(Line.dis_point_segment(cur.point,next.a,next.b)<cur.radius){
+                const p=cur.point,s=next.a,t=next.b;
+                if(Math.cmp(Point.dot(Point.sub(p,s),Point.sub(t,s)))<0){
+                    if(Point.sub(p,s).norm()<cur.radius){
+                        return s;
+                    }
+                }
+                if(Math.cmp(Point.dot(Point.sub(p,t),Point.sub(s,t)))<0){
+                    if(Point.sub(p,t).norm()<cur.radius){
+                        return t;
+                    }
+                }
+                if(Math.abs(Point.det(Point.sub(s,p),Point.sub(t,p))/Point.dist(s,t))<cur.radius){
+                    return Line.pointProjLine(p,s,t)
+                }
+            }
         }
         //矩阵、矩阵
         if(cur instanceof ccRect&&next instanceof ccRect){
@@ -407,14 +423,11 @@ class Game extends Node{
     slump(){
 
 
-        this.calculate(function (user,next) {
-            if(user.velocity.x===0&&user.velocity.y===0){
-                return;
-            }
-            if(user.isCirle&&next.isCirle){
-                const direct=Point.sub(next.point,user.point);
-
-                if(Point.dot(direct,Point.sub(user.velocity,next.velocity))>0){
+        this.calculate(function (user,next,point) {
+            const direct=Point.sub(point,user.point);
+            //是否发生碰撞
+            if(Point.dot(direct,Point.sub(user.velocity,next.velocity))>0){
+                if(user.isCirle&&next.isCirle){
                     const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
                     const y1=Point.sub(user.velocity,x1);
 
@@ -423,25 +436,13 @@ class Game extends Node{
                     user.velocity=Point.add(x2,y1);
                     next.velocity=Point.add(x1,y2);
                 }
-            }
-            if(user.isCirle&&next.isLine){
-                let  direct;
-                if(Math.cmp(Point.dot(Point.sub(user.point,next.a),Point.sub(next.b,next.a)))<0){
-                    direct=Point.sub(next.a,user.point);
-                }
-                if(Math.cmp(Point.dot(Point.sub(user.point,next.b),Point.sub(next.a,next.b)))<0){
-                    direct=Point.sub(next.b,user.point);
-                }else{
-                    direct=Point.sub(Line.pointProjLine(user.point,next.a,next.b),user.point);
-                }
-
-                if(Point.dot(direct,user.velocity)>0){
+                if(user.isCirle&&next.isLine){
                     const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
                     const y1=Point.sub(user.velocity,x1);
                     user.velocity=Point.add(Point(-x1.x,-x1.y),y1);
                 }
-
             }
+
 
 
         })
