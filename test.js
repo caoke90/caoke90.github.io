@@ -302,9 +302,10 @@ class Game extends Node{
 
         this.slumpObject=[]
         for(let k=0;k<100;k++){
-            const circle=new userCircle(Point(0|Math.random()*55+5,0|Math.random()*60+5),2)
-            this.world.add(circle)
-            this.slumpObject.push(circle)
+            const sp=new userCircle(Point(0|Math.random()*55+5,0|Math.random()*60+5),2)
+            this.world.add(sp)
+            this.slumpObject.push(sp)
+            sp.add(new ccText(k,Point(0,0)))
         }
         const line1=new ccLine(Point(0,0),Point(0,80))
         this.world.add(line1)
@@ -327,9 +328,7 @@ class Game extends Node{
         this.slumpObject.push(line)
 
         this.slumpObject[0].velocity=Point(1,1)
-        this.slumpObject.forEach(function (sp,i) {
-            sp.add(new ccText(i,Point(0,0)))
-        })
+
 
         this.slumpObject.sort( (sp1,sp2)=> {
             return this._sort(sp1.point,sp2.point)
@@ -409,6 +408,9 @@ class Game extends Node{
 
 
         this.calculate(function (user,next) {
+            if(user.velocity.x===0&&user.velocity.y===0){
+                return;
+            }
             if(user.isCirle&&next.isCirle){
                 const direct=Point.sub(next.point,user.point);
                 const x1=Line.pointProjLine(user.velocity,Point(0,0),direct);
