@@ -5,19 +5,35 @@
 <head>
   <meta charset=utf-8>
   <meta content="initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no,width=device-width,viewport-fit=cover,telephone=yes" name=viewport>
-  <link rel="shortcut icon" href=//ucenter.17zuoye.com/favicon.ico type=image/x-icon>
-  <title></title>
-  <link href=css/mbase.ec0ef23.css rel=stylesheet>
-  <link href=css/demo.ba30cbe.css rel=stylesheet>
+  <title>demo</title>
+  
 </head>
 
 <body>
 
-<div id=app></div>
+<div id=app>
+  <mv-modal></mv-modal>
+  <container :mkey=home></container>
+</div>
 
+<script src=https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js></script>
+<script type=text/javascript src=http://www.caoke.xyz/cardVue/js/demo.8c4f502.js></script>
+<script>
 
-<script type=text/javascript src=js/mbase.f4cdb4b.js></script>
-<script type=text/javascript src=js/demo.d8941a4.js></script>
+  //获取数据
+  const dataMap=JSON.parse(localStorage.getItem('demoData'));
+
+  //给容器设置数据
+  Vue.Container.setDataMap(dataMap);
+
+  //渲染
+  new Vue({
+    el: '#app',
+    data:{
+      home:dataMap._demo
+    }
+  });
+</script>
 </body>
 
 </html>

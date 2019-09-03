@@ -1,1 +1,0 @@
-webpackJsonp([28],{"x+HO":function(t,n){t.exports={render:function(){var t=this.$createElement;return(this._self._c||t)("img",{attrs:{src:"https://s2.ax1x.com/2019/08/20/mJ70qs.jpg",width:"100%"}})},staticRenderFns:[]}},yor2:function(t,n,r){var e=r("C7Lr")(null,r("x+HO"),!1,null,null,null);t.exports=e.exports}});
