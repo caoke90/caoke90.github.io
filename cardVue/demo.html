@@ -17,14 +17,15 @@
 </div>
 
 <script src=https://cdn.jsdelivr.net/npm/vue@2.6.10/dist/vue.js></script>
-<script type=text/javascript src=http://www.caoke.xyz/cardVue/js/demo.9114e5e.js></script>
+<script type=text/javascript src=http://www.caoke.xyz/cardVue/js/container.474953d.js></script>
+<script type=text/javascript src=http://www.caoke.xyz/cardVue/js/demo.88bb041.js></script>
 <script>
 
   //获取数据
   const dataMap=JSON.parse(localStorage.getItem('demoData'));
 
   //给容器设置数据
-  Vue.Container.setDataMap(dataMap);
+  Object.assign(Vue._cardMap,dataMap)
 
   //渲染
   new Vue({
