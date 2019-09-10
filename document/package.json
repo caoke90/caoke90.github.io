@@ -1,0 +1,18 @@
+{
+  "name": "mybook",
+  "version": "1.0.0",
+  "description": "线上demo",
+  "main": "index.js",
+  "scripts": {
+    "test": "gitbook serve"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://gitee.com/caoke90/mybook.git"
+  },
+  "keywords": [
+    "cardVue"
+  ],
+  "author": "caoke",
+  "license": "ISC"
+}
