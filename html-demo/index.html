@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #videoParent {
+            width: 220px;
+            height: 220px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            border-radius: 50%;
+            align-items: center;
+            margin-top: 30%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 0;
+            -webkit-mask-image: -webkit-radial-gradient(white, black);
+        }
+        #videoParent video{
+            background: red;
+        }
+
+        #tips {
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="App">
+        <div style="margin-top: 20px">
+            <span>当前状态：</span>
+            <span id="status"></span>
+        </div>
+        <div style="margin-top: 20px">
+            <span>提示语：</span>
+            <span id="tip"></span>
+        </div>
+        <div style="margin-top: 20px">
+            <span>颜色：</span>
+            <span id="color"></span>
+        </div>
+    </div>
+    <div id="videoParent"></div>
+</body>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/vConsole/3.0.0/vconsole.min.js"></script>
+<script>
+    var vConsole = new VConsole();
+</script>
+<script type='text/javascript' src="./rtcsdk.min.js" defer></script>
+<script type='text/javascript' src="./index.js" defer>
+</script>
+
+</html>
