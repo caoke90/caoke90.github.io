@@ -2,7 +2,7 @@ let rtcVideo = new RctVideo({
     videoWrapper: 'videoParent', //页面中镶嵌video元素的位置
     width: "320px",
     height: "320px",
-    token: '14d0bb1cc0c4c53fa4bfb6a06ec42d84',   //用户服务器端请求getToken返回的token
+    token: '2418778864d674bcbb18383b19167587',   //用户服务器端请求getToken返回的token
     colorListener: (color, status, index, sum) => {
         console.log(color, status, index, sum);
         document.body.setAttribute("style", `background: ${color}`);
