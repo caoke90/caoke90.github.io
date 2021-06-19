@@ -27,5 +27,5 @@ location.search.replace(/appChannel=([a-z]+)/, function (m, p1) {
   appChannel = p1;
 });
 var isApp = 'production' !== 'development' && appChannel !== 'dev';
-LCache.dataArr = ["lib/axios.540056b4.js", "lib/es6-promise.a88f2440.js", "lib/vue.f156a86b.js", "lib/vue-router.4dd7048f.js", "lib/fastclick.df47033b.js", "css/spa.6f5f1ca4.css", "js/spa.38118fbe.js"];
+LCache.dataArr = ["lib/axios.540056b4.js", "lib/es6-promise.a88f2440.js", "lib/vue.f156a86b.js", "lib/vue-router.4dd7048f.js", "lib/fastclick.df47033b.js", "css/spa.6f5f1ca4.css", "js/spa.85a4902e.js"];
 LCache.loadAll(LCache.dataArr);
