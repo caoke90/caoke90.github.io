@@ -26,7 +26,7 @@
 </body>
 <script>
     var ua = navigator.userAgent.toLowerCase()
-    if(ua.indexOf('jssdk') > -1&& ua.indexOf('android') > -1) {
+    if(ua.indexOf('jssdk') > -1) {
         window.location='intent://browser#Intent;scheme=http;package=com.huawei.browser;end'
     }
     document.querySelector('#useragent').innerText=ua
