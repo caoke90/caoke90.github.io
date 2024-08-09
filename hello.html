@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-    <title>兮辞短篇-阅读</title>
+    <title>测试intent</title>
 
     <style>
         /* 设置根字体大小为10px */
@@ -16,19 +16,56 @@
             width: 100vw;
             height: 100vh;
             display: flex;
+            flex-direction: column;
+        }
+        .input{
+            height: 200px;
+        }
+        .btn{
+            width: 40%;
+            height: 70px;
         }
     </style>
 </head>
 <body>
-<div class="page">
-    <div id="useragent"></div>
-</div>
+    <div class="page">
+        <div id="useragent"></div>
+        <textarea class="input" id="input" type="text">intent://browser#Intent;scheme=http;package=com.huawei.browser;end</textarea>
+        <button class="btn" onclick="btnclick()" >打开页面</button>
+        <ul id="myList">
+
+        </ul>
+    </div>
 </body>
 <script>
-    var ua = navigator.userAgent.toLowerCase()
-    if(ua.indexOf('jssdk') > -1) {
-        window.location='intent://browser#Intent;scheme=http;package=com.huawei.browser;end'
+    let intentList=[]
+    try{
+        intentList=JSON.parse(localStorage.getItem('intentList'))||[]
+    }catch (e){
     }
+    var ua = navigator.userAgent.toLowerCase()
     document.querySelector('#useragent').innerText=ua
+    function btnclick(e){
+        const text=document.querySelector('#input').value
+        if(intentList.indexOf(text)===-1){
+            intentList.push(text)
+            if(intentList.length>10){
+                intentList.shift()
+            }
+            localStorage.setItem('intentList',JSON.stringify(intentList))
+        }
+        window.location=text
+    }
+    intentList.forEach(function (text){
+        var x = document.createElement("LI");
+        x.onclick=clickli
+        var t = document.createTextNode(text);
+        x.appendChild(t);
+        document.getElementById("myList").appendChild(x);
+    })
+    function clickli(e){
+        console.log(e.target.innerHTML)
+        document.querySelector('#input').value=e.target.innerHTML
+    }
 </script>
 </html>
